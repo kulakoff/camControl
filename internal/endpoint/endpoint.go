@@ -2,6 +2,8 @@ package endpoint
 
 import (
 	"camControl/internal/service"
+	"database/sql"
+	"errors"
 	"github.com/labstack/echo/v4"
 	"log/slog"
 	"net/http"
@@ -28,12 +30,16 @@ func (e *endpoint) Status(с echo.Context) error {
 func (e *endpoint) GetCameraInfo(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid ID")
+		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 
 	slog.Info("GetCameraInfo", "id", id)
 	camera, err := e.service.GetCamera(uint(id))
 	if err != nil {
+		slog.Info(err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, "Camera not found")
+		}
 		return err
 	}
 	slog.Info("GetCameraInfo", "cam", camera)
