@@ -24,9 +24,9 @@ type ServerConfig struct {
 }
 
 func Load() (*Config, error) {
-	slog.Info("Loading config")
+	slog.Info("config | Loading config")
 	if err := godotenv.Load(); err != nil {
-		slog.Warn("No .env file found")
+		slog.Warn("config | No .env file found")
 	}
 
 	cfg := &Config{

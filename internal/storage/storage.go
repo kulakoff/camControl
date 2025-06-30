@@ -2,7 +2,6 @@ package storage
 
 import (
 	"camControl/internal/config"
-	"camControl/internal/models"
 	"context"
 	"fmt"
 	"log/slog"
@@ -11,14 +10,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Storage struct {
-	DB *pgxpool.Pool
+type PSQLStorage struct {
+	Logger *slog.Logger
+	DB     *pgxpool.Pool
 }
 
-func NewStorage(conf *config.DbConfig) (*Storage, error) {
+func NewPSQLStorage(conf *config.DbConfig, logger *slog.Logger) (*PSQLStorage, error) {
 	// format connection str
 	connStr := formatPostgresURL(conf)
-	slog.Info("TEST", "connStr", connStr)
+	slog.Info("storage | NewPSQLStorage", "connStr", connStr)
 
 	// create connection pool
 	psqlConf, err := pgxpool.ParseConfig(connStr)
@@ -36,15 +36,17 @@ func NewStorage(conf *config.DbConfig) (*Storage, error) {
 
 	// Check connection
 	if err := db.Ping(context.Background()); err != nil {
-		slog.Error("Unable to ping database", "error", err)
+		slog.Error("storage | Unable to ping database", "error", err)
 		return nil, fmt.Errorf("unable to ping database: %w", err)
 	}
 
-	slog.Info("Connected to database")
+	slog.Info("storage | Connected to DB")
 
-	return &Storage{DB: db}, nil
+	return &PSQLStorage{
+		DB:     db,
+		Logger: logger}, nil
 }
-func (s *Storage) Close() {
+func (s *PSQLStorage) Close() {
 	if s.DB != nil {
 		s.DB.Close()
 		slog.Info("Closed database connection")
@@ -64,20 +66,20 @@ func formatPostgresURL(cfg *config.DbConfig) string {
 	)
 }
 
-func (s *Storage) GetCameraByID(ctx context.Context, cameraId int) (*models.Camera, error) {
-	camera := &models.Camera{}
-	query := `SELECT id, ip, login, password FROM cameras WHERE id=$1`
-
-	err := s.DB.QueryRow(ctx, query, cameraId).Scan(
-		&camera.ID,
-		&camera.IP,
-		&camera.Login,
-		&camera.Password,
-	)
-	if err != nil {
-		slog.Error("Error getting camera by id", "id", cameraId)
-		return nil, err
-	}
-
-	return camera, nil
-}
+//func (s *PSQLStorage) GetCameraByID(ctx context.Context, cameraId int) (*models.Camera, error) {
+//	camera := &models.Camera{}
+//	query := `SELECT id, ip, login, password FROM cameras WHERE id=$1`
+//
+//	err := s.DB.QueryRow(ctx, query, cameraId).Scan(
+//		&camera.ID,
+//		&camera.IP,
+//		&camera.Login,
+//		&camera.Password,
+//	)
+//	if err != nil {
+//		slog.Error("Error getting camera by id", "id", cameraId)
+//		return nil, err
+//	}
+//
+//	return camera, nil
+//}
