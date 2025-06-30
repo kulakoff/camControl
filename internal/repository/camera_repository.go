@@ -19,7 +19,7 @@ func New(db *pgxpool.Pool) CameraRepository {
 	return &cameraRepository{DB: db}
 }
 
-func (c *cameraRepository) GetCameraByID(cameraId uint) (*models.Camera, error) {
+func (r *cameraRepository) GetCameraByID(cameraId uint) (*models.Camera, error) {
 	//TODO implement me
 	//panic("implement me")
 	slog.Debug("cameraRepository | GetCameraByID")
@@ -28,7 +28,7 @@ func (c *cameraRepository) GetCameraByID(cameraId uint) (*models.Camera, error) 
 	camera := &models.Camera{}
 
 	query := `SELECT id, ip, login, password FROM cameras WHERE id=$1`
-	err := c.DB.QueryRow(ctx, query, cameraId).Scan(
+	err := r.DB.QueryRow(ctx, query, cameraId).Scan(
 		&camera.ID,
 		&camera.IP,
 		&camera.Login,
