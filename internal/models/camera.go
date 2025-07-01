@@ -6,9 +6,3 @@ type Camera struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
-
-type PTZRequest struct {
-	CameraID int    `json:"camera_id"`
-	Action   string `json:"action"`
-	Preset   string `json:"preset,omitempty"`
-}

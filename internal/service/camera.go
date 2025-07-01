@@ -23,6 +23,6 @@ func (s *cameraService) GetCamera(cameraId uint) (*models.Camera, error) {
 	return camera, nil
 }
 
-func New(repo repository.CameraRepository) CameraService {
+func NewCameraRepository(repo repository.CameraRepository) CameraService {
 	return &cameraService{Repo: repo}
 }
