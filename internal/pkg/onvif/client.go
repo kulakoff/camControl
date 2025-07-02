@@ -22,6 +22,8 @@ type PTZController struct {
 	//minStep      float64
 }
 
+const SPEED time.Duration = 100
+
 func New(ip, port, username, password string, minStep float64) (*PTZController, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -83,7 +85,7 @@ func (c *PTZController) GetDeviceInfo(ctx context.Context) error {
 }
 
 func (c *PTZController) Move(direction models.PTZAction) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 	defer cancel()
 
 	err := c.CheckPTZSupport(ctx)
@@ -104,6 +106,8 @@ func (c *PTZController) Move(direction models.PTZAction) error {
 		y = -models.MinStep
 	}
 
+	slog.Info("Move", "X", x, "Y", y)
+
 	// cal ptz action
 	_, err = sdk_ptz.Call_ContinuousMove(ctx, c.dev, ptz.ContinuousMove{
 		ProfileToken: onvif.ReferenceToken(c.profileToken),
@@ -116,7 +120,7 @@ func (c *PTZController) Move(direction models.PTZAction) error {
 		return err
 	}
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(SPEED * time.Millisecond)
 	return c.Stop(ctx)
 }
 

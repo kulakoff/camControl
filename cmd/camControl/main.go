@@ -38,6 +38,7 @@ func main() {
 	camRepo := repository.NewCameraRepository(camStorage.DB)
 	// layer 02
 	ptzService := service.NewPTZService(camRepo)
+	// layer 03
 	ptzHandler := endpoint.NewPTZHandler(ptzService)
 
 	e := echo.New()
