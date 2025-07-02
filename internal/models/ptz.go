@@ -5,6 +5,7 @@ import "time"
 type PTZRequest struct {
 	CameraID int    `json:"camera_id"`
 	Action   string `json:"action"`
+	Speed    int    `json:"speed,omitempty"`
 	//Preset   string `json:"preset,omitempty"`
 }
 

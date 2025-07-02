@@ -57,5 +57,5 @@ func (s *ptzService) MoveCamera(ctx context.Context, req *models.PTZRequest) err
 	}
 
 	// FIXME
-	return ctrl.Move(models.PTZAction(req.Action))
+	return ctrl.Move(models.PTZAction(req.Action), req.Speed)
 }

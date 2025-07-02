@@ -84,9 +84,13 @@ func (c *PTZController) GetDeviceInfo(ctx context.Context) error {
 	return nil
 }
 
-func (c *PTZController) Move(direction models.PTZAction) error {
+func (c *PTZController) Move(direction models.PTZAction, speed int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 	defer cancel()
+
+	if speed > 1000 {
+		return fmt.Errorf("speed too high")
+	}
 
 	err := c.CheckPTZSupport(ctx)
 	if err != nil {
@@ -120,7 +124,7 @@ func (c *PTZController) Move(direction models.PTZAction) error {
 		return err
 	}
 
-	time.Sleep(SPEED * time.Millisecond)
+	time.Sleep(time.Duration(speed) * time.Millisecond)
 	return c.Stop(ctx)
 }
 
