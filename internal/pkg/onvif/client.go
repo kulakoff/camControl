@@ -82,7 +82,7 @@ func (c *PTZController) GetDeviceInfo(ctx context.Context) error {
 	return nil
 }
 
-func (c *PTZController) Move(direction models.PTZAction, speed float64) error {
+func (c *PTZController) Move(direction models.PTZAction) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -116,6 +116,7 @@ func (c *PTZController) Move(direction models.PTZAction, speed float64) error {
 		return err
 	}
 
+	time.Sleep(500 * time.Millisecond)
 	return c.Stop(ctx)
 }
 

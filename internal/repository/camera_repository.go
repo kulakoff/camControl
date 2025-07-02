@@ -15,7 +15,7 @@ type CameraRepository interface {
 	GetCameraByID(uint) (*models.Camera, error)
 }
 
-func New(db *pgxpool.Pool) CameraRepository {
+func NewCameraRepository(db *pgxpool.Pool) CameraRepository {
 	return &cameraRepository{DB: db}
 }
 

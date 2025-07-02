@@ -5,7 +5,7 @@ import "time"
 type PTZRequest struct {
 	CameraID int    `json:"camera_id"`
 	Action   string `json:"action"`
-	Preset   string `json:"preset,omitempty"`
+	//Preset   string `json:"preset,omitempty"`
 }
 
 type PTZAction string
@@ -16,6 +16,6 @@ const (
 	PTZUp    PTZAction = "up"
 	PTZDown  PTZAction = "down"
 	PTZStop  PTZAction = "stop"
-	MinStep  float64   = 1
-	Duration           = 500 * time.Millisecond
+	MinStep  float64   = 0.5
+	Duration           = time.Second * 3
 )

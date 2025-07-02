@@ -10,6 +10,7 @@ import (
 
 type PTZService interface {
 	MoveCamera(ctx context.Context, req *models.PTZRequest) error
+	//getController(ctx context.Context, cameraID uint) (*onvif_client.PTZController, error)
 }
 
 type ptzService struct {
@@ -17,22 +18,13 @@ type ptzService struct {
 	camRepo     repository.CameraRepository
 }
 
-func (s ptzService) MoveCamera(ctx context.Context, req *models.PTZRequest) error {
-	//TODO implement me
-	ctrl, err := s.getController(ctx, uint(req.CameraID))
-	if err != nil {
-		return err
+func NewPTZService(repo repository.CameraRepository) PTZService {
+	return &ptzService{
+		camRepo: repo,
 	}
-
-	// FIXME
-	return ctrl.Move(models.PTZAction(req.Action), 0.5)
 }
 
-func New(repo repository.CameraRepository) PTZService {
-	return &ptzService{camRepo: repo}
-}
-
-func (s *ptzService) getController(сеч context.Context, cameraID uint) (*onvif_client.PTZController, error) {
+func (s *ptzService) getController(ctx context.Context, cameraID uint) (*onvif_client.PTZController, error) {
 	// 01 - check from cache
 	if ctrl, ok := s.controllers.Load(cameraID); ok {
 		return ctrl.(*onvif_client.PTZController), nil
@@ -55,4 +47,15 @@ func (s *ptzService) getController(сеч context.Context, cameraID uint) (*onvi
 	s.controllers.Store(cameraID, ctrl)
 
 	return ctrl, nil
+}
+
+func (s *ptzService) MoveCamera(ctx context.Context, req *models.PTZRequest) error {
+	//TODO implement me
+	ctrl, err := s.getController(ctx, uint(req.CameraID))
+	if err != nil {
+		return err
+	}
+
+	// FIXME
+	return ctrl.Move(models.PTZAction(req.Action))
 }
