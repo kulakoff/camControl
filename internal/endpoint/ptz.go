@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"log/slog"
 	"net/http"
+	"strconv"
 )
 
 type PTZHandler struct {
@@ -35,19 +36,16 @@ func (h *PTZHandler) MoveCamera(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"status": "success"})
 }
 
-func (h *PTZHandler) MoveCameraSimple(c echo.Context) error {
-	slog.Info("PTZHandler | MoveCameraSimple")
-	//TODO: add check request params
-	var req models.PTZRequest
-	err := c.Bind(&req)
+func (h *PTZHandler) GetPresets(c echo.Context) error {
+	slog.Info("PTZHandler | GetPresets")
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		slog.Error("MoveCamera, bind request", "err", err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 
-	slog.Info("MoveCameraSimple", "data", req)
+	presets, _ := h.service.GetPresets(c.Request().Context(), uint(id))
 
-	return c.NoContent(http.StatusNoContent)
+	return c.JSON(http.StatusOK, presets)
 }
 
 func (h *PTZHandler) Ping(c echo.Context) error {
@@ -57,6 +55,6 @@ func (h *PTZHandler) Ping(c echo.Context) error {
 func (h *PTZHandler) RegisterRoutes(e *echo.Echo) {
 	g := e.Group("/ptz")
 	g.POST("/move", h.MoveCamera)
-	g.POST("/move/simple", h.MoveCameraSimple)
+	g.GET("/presets/:id", h.GetPresets)
 	g.GET("/ping", h.Ping)
 }

@@ -3,6 +3,7 @@ package onvif_client
 import (
 	"camControl/internal/models"
 	"context"
+	"encoding/xml"
 	"fmt"
 	goonvif "github.com/use-go/onvif"
 	"github.com/use-go/onvif/device"
@@ -12,9 +13,24 @@ import (
 	sdk_media "github.com/use-go/onvif/sdk/media"
 	sdk_ptz "github.com/use-go/onvif/sdk/ptz"
 	"github.com/use-go/onvif/xsd/onvif"
+	"io"
 	"log/slog"
 	"time"
 )
+
+type Preset struct {
+	Token string
+	Name  string
+}
+
+type PTZPreset struct {
+	Token string `xml:"token,attr"`
+	Name  string `xml:"Name"`
+}
+
+type GetPresetsResponse struct {
+	Presets []PTZPreset `xml:"Body>GetPresetsResponse>Preset"`
+}
 
 type PTZController struct {
 	dev          *goonvif.Device
@@ -147,4 +163,62 @@ func (c *PTZController) CheckPTZSupport(ctx context.Context) error {
 		return fmt.Errorf("get capabilities failed %w", err)
 	}
 	return nil
+}
+
+func (c *PTZController) GotoPreset(ctx context.Context, presetToken string) error {
+	response, err := sdk_ptz.Call_GotoPreset(ctx, c.dev, ptz.GotoPreset{
+		ProfileToken: onvif.ReferenceToken(c.profileToken),
+		PresetToken:  onvif.ReferenceToken(presetToken),
+	})
+	if err != nil {
+		return fmt.Errorf("call GotoPreset failed: %v", err)
+	}
+	slog.Info("GotoPreset response", "response", response)
+	return nil
+}
+
+// GetPresets custom getPreset method
+func (c *PTZController) GetPresets(ctx context.Context) ([]PTZPreset, error) {
+	//type PTZPreset struct {
+	//	Token string `xml:"token,attr"`
+	//	Name  string `xml:"Name"`
+	//}
+	//
+	//type GetPresetsResponse struct {
+	//	Presets []PTZPreset `xml:"Body>GetPresetsResponse>Preset"`
+	//}
+
+	request := ptz.GetPresets{
+		ProfileToken: onvif.ReferenceToken(c.profileToken),
+	}
+
+	rawResponse, err := c.dev.CallMethod(request)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call GetPresets: %v", err)
+	}
+	defer rawResponse.Body.Close()
+
+	body, err := io.ReadAll(rawResponse.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	//slog.Info("GetPresets raw response", "response", string(body))
+
+	var response GetPresetsResponse
+	if err := xml.Unmarshal(body, &response); err != nil {
+		return nil, fmt.Errorf("failed to parse GetPresets response: %v", err)
+	}
+
+	//slog.Info("Parsed GetPresets response", "response", response)
+
+	var presets []PTZPreset
+	for _, preset := range response.Presets {
+		presets = append(presets, PTZPreset{
+			Token: preset.Token,
+			Name:  preset.Name,
+		})
+	}
+
+	return presets, nil
 }

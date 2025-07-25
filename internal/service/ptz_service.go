@@ -5,11 +5,13 @@ import (
 	onvif_client "camControl/internal/pkg/onvif"
 	"camControl/internal/repository"
 	"context"
+	"log/slog"
 	"sync"
 )
 
 type PTZService interface {
 	MoveCamera(ctx context.Context, req *models.PTZRequest) error
+	GetPresets(ctx context.Context, cameraID uint) ([]onvif_client.PTZPreset, error)
 	//getController(ctx context.Context, cameraID uint) (*onvif_client.PTZController, error)
 }
 
@@ -58,4 +60,13 @@ func (s *ptzService) MoveCamera(ctx context.Context, req *models.PTZRequest) err
 
 	// FIXME
 	return ctrl.Move(models.PTZAction(req.Action), req.Speed)
+}
+
+func (s *ptzService) GetPresets(ctx context.Context, cameraID uint) ([]onvif_client.PTZPreset, error) {
+	slog.Info("PTZService | GetPresets")
+	ctrl, err := s.getController(ctx, cameraID)
+	if err != nil {
+		return nil, err
+	}
+	return ctrl.GetPresets(ctx)
 }
