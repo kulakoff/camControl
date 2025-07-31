@@ -55,6 +55,6 @@ func (h *PTZHandler) Ping(c echo.Context) error {
 func (h *PTZHandler) RegisterRoutes(e *echo.Echo) {
 	g := e.Group("/ptz")
 	g.POST("/move", h.MoveCamera)
-	g.GET("/presets/:id", h.GetPresets)
+	g.GET("/presets/:id", h.GetPresets) // get presets by camera
 	g.GET("/ping", h.Ping)
 }
