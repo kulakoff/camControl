@@ -8,6 +8,10 @@ type PTZRequest struct {
 	Speed    int    `json:"speed,omitempty"`
 	//Preset   string `json:"preset,omitempty"`
 }
+type PTZRequestPreset struct {
+	CameraID    int    `json:"camera_id"`
+	PresetToken string `json:"preset_token"`
+}
 
 type PTZAction string
 

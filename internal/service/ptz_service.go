@@ -12,6 +12,7 @@ import (
 type PTZService interface {
 	MoveCamera(ctx context.Context, req *models.PTZRequest) error
 	GetPresets(ctx context.Context, cameraID uint) ([]onvif_client.PTZPreset, error)
+	GoToPreset(ctx context.Context, cameraID uint, presetToken string) error
 	//getController(ctx context.Context, cameraID uint) (*onvif_client.PTZController, error)
 }
 
@@ -29,6 +30,7 @@ func NewPTZService(repo repository.CameraRepository) PTZService {
 func (s *ptzService) getController(ctx context.Context, cameraID uint) (*onvif_client.PTZController, error) {
 	// 01 - check from cache
 	if ctrl, ok := s.controllers.Load(cameraID); ok {
+		slog.Info("getController", "cam", cameraID)
 		return ctrl.(*onvif_client.PTZController), nil
 	}
 
@@ -69,4 +71,13 @@ func (s *ptzService) GetPresets(ctx context.Context, cameraID uint) ([]onvif_cli
 		return nil, err
 	}
 	return ctrl.GetPresets(ctx)
+}
+
+func (s *ptzService) GoToPreset(ctx context.Context, cameraID uint, presetToken string) error {
+	slog.Info("PTZService | GoToPreset", "cameraID", cameraID, "presetToken", presetToken)
+	ctrl, err := s.getController(ctx, cameraID)
+	if err != nil {
+		return err
+	}
+	return ctrl.GotoPreset(ctx, presetToken)
 }

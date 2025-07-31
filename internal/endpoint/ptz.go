@@ -37,15 +37,29 @@ func (h *PTZHandler) MoveCamera(c echo.Context) error {
 }
 
 func (h *PTZHandler) GetPresets(c echo.Context) error {
-	slog.Info("PTZHandler | GetPresets")
-	id, err := strconv.Atoi(c.Param("id"))
+	cameraId, err := strconv.Atoi(c.Param("cameraId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
+	slog.Info("PTZHandler | GetPresets from camera ID: " + strconv.Itoa(cameraId))
 
-	presets, _ := h.service.GetPresets(c.Request().Context(), uint(id))
+	presets, _ := h.service.GetPresets(c.Request().Context(), uint(cameraId))
 
 	return c.JSON(http.StatusOK, presets)
+}
+
+func (h *PTZHandler) GoToPreset(c echo.Context) error {
+	slog.Info("GoToPreset")
+	var req models.PTZRequestPreset
+	err := c.Bind(&req)
+	if err != nil {
+		slog.Error("GoToPreset, bind request err", "err", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+	}
+
+	slog.Info("PTZHandler | GoToPreset", "req", req)
+	h.service.GoToPreset(c.Request().Context(), uint(req.CameraID), req.PresetToken)
+	return c.NoContent(http.StatusNoContent)
 }
 
 func (h *PTZHandler) Ping(c echo.Context) error {
@@ -55,6 +69,10 @@ func (h *PTZHandler) Ping(c echo.Context) error {
 func (h *PTZHandler) RegisterRoutes(e *echo.Echo) {
 	g := e.Group("/ptz")
 	g.POST("/move", h.MoveCamera)
-	g.GET("/presets/:id", h.GetPresets) // get presets by camera
+	g.GET("/presets/:cameraId", h.GetPresets) // get presets by cameraID
+	g.POST("/preset", h.GoToPreset)           // go to PTZ preset
+	// TODO: create New PTZ preset
+	// TODO: delete PTZ preset
+	// TODO: update PTZ preset
 	g.GET("/ping", h.Ping)
 }

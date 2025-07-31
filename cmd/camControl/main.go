@@ -13,6 +13,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+/**
+TODO:
+	1: monitoring
+		- add monitoring in config (prometheus)
+		- if monitoring enabled check available IP camera from monitoring before request,
+	2: add Prometheus metrics per camera all PTZ requests
+*/
+
 func main() {
 	// TODO: config logger level from ENV
 	// config logger
@@ -24,7 +32,6 @@ func main() {
 	if err != nil {
 		slog.Error("Error loading config: ", err)
 	}
-	slog.Info("Debug conf", "conf", cfg)
 
 	// init postgres storage
 	camStorage, err := storage.NewPSQLStorage(&cfg.Db, logger)
