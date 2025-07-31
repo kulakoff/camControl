@@ -18,7 +18,6 @@ type PSQLStorage struct {
 func NewPSQLStorage(conf *config.DbConfig, logger *slog.Logger) (*PSQLStorage, error) {
 	// format connection str
 	connStr := formatPostgresURL(conf)
-	slog.Info("storage | NewPSQLStorage", "connStr", connStr)
 
 	// create connection pool
 	psqlConf, err := pgxpool.ParseConfig(connStr)
@@ -40,7 +39,7 @@ func NewPSQLStorage(conf *config.DbConfig, logger *slog.Logger) (*PSQLStorage, e
 		return nil, fmt.Errorf("unable to ping database: %w", err)
 	}
 
-	slog.Info("storage | Connected to DB")
+	slog.Info("storage | Connected to DB", "db", connStr)
 
 	return &PSQLStorage{
 		DB:     db,
