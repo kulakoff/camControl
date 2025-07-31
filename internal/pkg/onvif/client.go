@@ -177,6 +177,18 @@ func (c *PTZController) GotoPreset(ctx context.Context, presetToken string) erro
 	return nil
 }
 
+func (c *PTZController) SetPreset(ctx context.Context, presetToken string) (string, error) {
+	response, err := sdk_ptz.Call_SetPreset(ctx, c.dev, ptz.SetPreset{
+		ProfileToken: onvif.ReferenceToken(c.profileToken),
+		PresetToken:  onvif.ReferenceToken(presetToken),
+	})
+	if err != nil {
+		return "", fmt.Errorf("call SetPreset failed: %v", err)
+	}
+
+	return string(response.PresetToken), nil
+}
+
 // GetPresets custom getPreset method
 func (c *PTZController) GetPresets(ctx context.Context) ([]PTZPreset, error) {
 	//type PTZPreset struct {

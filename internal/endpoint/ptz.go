@@ -62,6 +62,20 @@ func (h *PTZHandler) GoToPreset(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+func (h *PTZHandler) SetPTZPreset(c echo.Context) error {
+	slog.Info("SetPTZPreset")
+	var req models.PTZRequestPreset
+	err := c.Bind(&req)
+	if err != nil {
+		slog.Error("SetPTZPreset, bind request err", "err", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+	}
+
+	slog.Info("PTZHandler | SetPTZPreset", "req", req)
+	h.service.SetPreset(c.Request().Context(), uint(req.CameraID), req.PresetToken)
+	return c.NoContent(http.StatusNoContent)
+}
+
 func (h *PTZHandler) Ping(c echo.Context) error {
 	return c.JSON(http.StatusOK, "pong")
 }
@@ -71,8 +85,10 @@ func (h *PTZHandler) RegisterRoutes(e *echo.Echo) {
 	g.POST("/move", h.MoveCamera)
 	g.GET("/presets/:cameraId", h.GetPresets) // get presets by cameraID
 	g.POST("/preset", h.GoToPreset)           // go to PTZ preset
-	// TODO: create New PTZ preset
-	// TODO: delete PTZ preset
-	// TODO: update PTZ preset
+
+	//// TODO: create New PTZ preset
+	g.POST("/preset/set", h.SetPTZPreset)
+	//// TODO: delete PTZ preset
+	//// TODO: update PTZ preset
 	g.GET("/ping", h.Ping)
 }
