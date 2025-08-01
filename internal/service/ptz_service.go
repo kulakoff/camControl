@@ -46,7 +46,7 @@ func (s *ptzService) getController(ctx context.Context, cameraID uint) (*onvif_c
 
 	// 03 - make new camera controller
 	// TODO: refactor port and minStep
-	ctrl, err := onvif_client.New(camera.IP, "80", camera.Login, camera.Password, 1)
+	ctrl, err := onvif_client.New(camera.IP, "80", camera.Login, camera.Password, 1, s.logger)
 	if err != nil {
 		return nil, err
 	}

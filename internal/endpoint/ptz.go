@@ -99,10 +99,10 @@ func (h *PTZHandler) Ping(c echo.Context) error {
 
 func (h *PTZHandler) RegisterRoutes(e *echo.Echo) {
 	g := e.Group("/ptz")
+	g.GET("/ping", h.Ping)
 	g.POST("/move", h.MoveCamera)
 	g.GET("/preset/:cameraId", h.GetPresets) // get presets by cameraID
 	g.POST("/preset", h.GoToPreset)          // go to PTZ preset
 	g.POST("/preset/set", h.SetPTZPreset)
 	g.DELETE("/preset/:cameraId/:presetToken", h.RemovePTZPreset)
-	g.GET("/ping", h.Ping)
 }

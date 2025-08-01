@@ -35,12 +35,13 @@ type GetPresetsResponse struct {
 type PTZController struct {
 	dev          *goonvif.Device
 	profileToken string
+	logger       *slog.Logger
 	//minStep      float64
 }
 
 const SPEED time.Duration = 100
 
-func New(ip, port, username, password string, minStep float64) (*PTZController, error) {
+func New(ip, port, username, password string, minStep float64, logger *slog.Logger) (*PTZController, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -58,11 +59,12 @@ func New(ip, port, username, password string, minStep float64) (*PTZController, 
 		return nil, fmt.Errorf("failed to get profile token: %w", err)
 	}
 
-	slog.Info("DEBUG | Initialized camera controller", "ip", ip, "port", port, "profile", profileToken)
+	logger.Debug("DEBUG | Initialized camera controller", "ip", ip, "port", port, "profile", profileToken)
 
 	return &PTZController{
 		dev,
 		profileToken,
+		logger,
 		//minStep,
 	}, nil
 }
