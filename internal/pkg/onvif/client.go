@@ -189,6 +189,19 @@ func (c *PTZController) SetPreset(ctx context.Context, presetToken string) (stri
 	return string(response.PresetToken), nil
 }
 
+func (c *PTZController) RemovePreset(ctx context.Context, presetToken string) error {
+	slog.Info("onvif_client | RemovePreset", "presetToken", presetToken)
+	_, err := sdk_ptz.Call_RemovePreset(ctx, c.dev, ptz.RemovePreset{
+		ProfileToken: onvif.ReferenceToken(c.profileToken),
+		PresetToken:  onvif.ReferenceToken(presetToken),
+	})
+	if err != nil {
+		return fmt.Errorf("call RemovePreset failed: %v", err)
+	}
+
+	return nil
+}
+
 // GetPresets custom getPreset method
 func (c *PTZController) GetPresets(ctx context.Context) ([]PTZPreset, error) {
 	//type PTZPreset struct {

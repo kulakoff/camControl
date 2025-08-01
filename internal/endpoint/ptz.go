@@ -76,6 +76,22 @@ func (h *PTZHandler) SetPTZPreset(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+func (h *PTZHandler) RemovePTZPreset(c echo.Context) error {
+	slog.Info("RemovePTZPreset")
+	cameraId, err := strconv.Atoi(c.Param("cameraId"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid cameraId")
+	}
+	presetToken, err := strconv.Atoi(c.Param("presetToken"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "presetToken")
+	}
+
+	slog.Info("RemovePTZPreset data", "cameraId", cameraId, "presetToken", presetToken)
+	h.service.RemovePreset(c.Request().Context(), uint(cameraId), strconv.Itoa(presetToken))
+	return c.NoContent(http.StatusNoContent)
+}
+
 func (h *PTZHandler) Ping(c echo.Context) error {
 	return c.JSON(http.StatusOK, "pong")
 }
@@ -83,12 +99,9 @@ func (h *PTZHandler) Ping(c echo.Context) error {
 func (h *PTZHandler) RegisterRoutes(e *echo.Echo) {
 	g := e.Group("/ptz")
 	g.POST("/move", h.MoveCamera)
-	g.GET("/presets/:cameraId", h.GetPresets) // get presets by cameraID
-	g.POST("/preset", h.GoToPreset)           // go to PTZ preset
-
-	//// TODO: create New PTZ preset
+	g.GET("/preset/:cameraId", h.GetPresets) // get presets by cameraID
+	g.POST("/preset", h.GoToPreset)          // go to PTZ preset
 	g.POST("/preset/set", h.SetPTZPreset)
-	//// TODO: delete PTZ preset
-	//// TODO: update PTZ preset
+	g.DELETE("/preset/:cameraId/:presetToken", h.RemovePTZPreset)
 	g.GET("/ping", h.Ping)
 }

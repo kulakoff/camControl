@@ -42,7 +42,7 @@ func main() {
 	defer camStorage.Close()
 
 	// layer 01
-	camRepo := repository.NewCameraRepository(camStorage.DB)
+	camRepo := repository.NewCameraRepository(camStorage.DB, *logger)
 	// layer 02
 	ptzService := service.NewPTZService(camRepo)
 	// layer 03
@@ -50,15 +50,10 @@ func main() {
 
 	e := echo.New()
 	e.HideBanner = false
-
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	ptzHandler.RegisterRoutes(e)
-
-	//cameraEndpoint := endpoint.New(camService)
-	//apiV1 := e.Group("/api/v1")
-	//cameraEndpoint.RegisterRoutes(apiV1)
 
 	go e.Logger.Fatal(e.Start(cfg.Server.Port))
 }

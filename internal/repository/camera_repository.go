@@ -8,21 +8,22 @@ import (
 )
 
 type cameraRepository struct {
-	DB *pgxpool.Pool
+	DB     *pgxpool.Pool
+	Logger *slog.Logger
 }
 
 type CameraRepository interface {
 	GetCameraByID(uint) (*models.Camera, error)
 }
 
-func NewCameraRepository(db *pgxpool.Pool) CameraRepository {
-	return &cameraRepository{DB: db}
+func NewCameraRepository(db *pgxpool.Pool, logger slog.Logger) CameraRepository {
+	return &cameraRepository{DB: db, Logger: &logger}
 }
 
 func (r *cameraRepository) GetCameraByID(cameraId uint) (*models.Camera, error) {
 	//TODO implement me
 	//panic("implement me")
-	slog.Debug("cameraRepository | GetCameraByID")
+	r.Logger.Debug("cameraRepository | GetCameraByID", "cameraId", cameraId)
 	ctx := context.Background()
 
 	camera := &models.Camera{}
@@ -35,7 +36,7 @@ func (r *cameraRepository) GetCameraByID(cameraId uint) (*models.Camera, error) 
 		&camera.Password,
 	)
 	if err != nil {
-		slog.Error("Error getting camera by id", "id", cameraId)
+		r.Logger.Error("Error getting camera by id", "id", cameraId)
 		return nil, err
 	}
 

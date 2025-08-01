@@ -14,25 +14,13 @@ type PTZService interface {
 	GetPresets(ctx context.Context, cameraID uint) ([]onvif_client.PTZPreset, error)
 	GoToPreset(ctx context.Context, cameraID uint, presetToken string) error
 	SetPreset(ctx context.Context, cameraID uint, presetToken string) error
+	RemovePreset(ctx context.Context, cameraID uint, presetToken string) error
 	//getController(ctx context.Context, cameraID uint) (*onvif_client.PTZController, error)
 }
 
 type ptzService struct {
 	controllers sync.Map // cache controllers
 	camRepo     repository.CameraRepository
-}
-
-func (s *ptzService) SetPreset(ctx context.Context, cameraID uint, presetToken string) error {
-	//TODO implement me
-	slog.Info("PTZService | SetPreset", "cameraID", cameraID, "presetToken", presetToken)
-	ctrl, err := s.getController(ctx, cameraID)
-	if err != nil {
-		return err
-	}
-
-	ctrl.SetPreset(ctx, presetToken)
-	return nil
-	//panic("implement me")
 }
 
 func NewPTZService(repo repository.CameraRepository) PTZService {
@@ -94,4 +82,28 @@ func (s *ptzService) GoToPreset(ctx context.Context, cameraID uint, presetToken 
 		return err
 	}
 	return ctrl.GotoPreset(ctx, presetToken)
+}
+
+func (s *ptzService) SetPreset(ctx context.Context, cameraID uint, presetToken string) error {
+	slog.Info("PTZService | SetPreset", "cameraID", cameraID, "presetToken", presetToken)
+	ctrl, err := s.getController(ctx, cameraID)
+	if err != nil {
+		return err
+	}
+
+	ctrl.SetPreset(ctx, presetToken)
+	return nil
+	//panic("implement me")
+}
+
+func (s *ptzService) RemovePreset(ctx context.Context, cameraID uint, presetToken string) error {
+	//TODO implement me
+	slog.Info("PTZService | RemovePreset", "cameraID", cameraID, "presetToken", presetToken)
+	ctrl, err := s.getController(ctx, cameraID)
+	if err != nil {
+		return err
+	}
+
+	ctrl.RemovePreset(ctx, presetToken)
+	return nil
 }
