@@ -22,31 +22,31 @@ TODO:
 */
 
 func main() {
-	// TODO: config logger level from ENV
-	// config logger
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	logger.Info("App started")
-
 	// load config
 	cfg, err := config.Load()
 	if err != nil {
 		slog.Error("Error loading config: ", err)
 	}
 
+	// config logger
+	// TODO: config logger level from ENV
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	logger.Info("App started")
+
 	// init postgres storage
 	camStorage, err := storage.NewPSQLStorage(&cfg.Db, logger)
 	if err != nil {
-		slog.Error("Error creating storage: ", err)
+		logger.Error("Error creating storage: ", err)
 		os.Exit(1)
 	}
 	defer camStorage.Close()
 
 	// layer 01
-	camRepo := repository.NewCameraRepository(camStorage.DB, *logger)
+	camRepo := repository.NewCameraRepository(camStorage.DB, logger)
 	// layer 02
-	ptzService := service.NewPTZService(camRepo)
+	ptzService := service.NewPTZService(camRepo, logger)
 	// layer 03
-	ptzHandler := endpoint.NewPTZHandler(ptzService)
+	ptzHandler := endpoint.NewPTZHandler(ptzService, logger)
 
 	e := echo.New()
 	e.HideBanner = false

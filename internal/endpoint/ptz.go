@@ -11,23 +11,24 @@ import (
 
 type PTZHandler struct {
 	service service.PTZService
+	logger  slog.Logger
 }
 
-func NewPTZHandler(s service.PTZService) *PTZHandler {
-	return &PTZHandler{service: s}
+func NewPTZHandler(s service.PTZService, logger *slog.Logger) *PTZHandler {
+	return &PTZHandler{service: s, logger: *logger}
 }
 
 func (h *PTZHandler) MoveCamera(c echo.Context) error {
-	slog.Info("PTZHandler | MoveCamera")
+	h.logger.Debug("PTZService | MoveCamera")
 	//TODO: add check request params
 	var req models.PTZRequest
 	err := c.Bind(&req)
 	if err != nil {
-		slog.Error("MoveCamera, bind request", "err", err)
+		h.logger.Error("MoveCamera, bind request", "err", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
 	}
 
-	slog.Info("PTZHandler | MoveCamera", "req", req)
+	h.logger.Debug("PTZHandler | MoveCamera", "req", req)
 
 	if err := h.service.MoveCamera(c.Request().Context(), &req); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
@@ -41,7 +42,7 @@ func (h *PTZHandler) GetPresets(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	slog.Info("PTZHandler | GetPresets from camera ID: " + strconv.Itoa(cameraId))
+	h.logger.Debug("PTZHandler | GetPresets from camera ID: " + strconv.Itoa(cameraId))
 
 	presets, _ := h.service.GetPresets(c.Request().Context(), uint(cameraId))
 
@@ -49,7 +50,7 @@ func (h *PTZHandler) GetPresets(c echo.Context) error {
 }
 
 func (h *PTZHandler) GoToPreset(c echo.Context) error {
-	slog.Info("GoToPreset")
+	h.logger.Debug("GoToPreset")
 	var req models.PTZRequestPreset
 	err := c.Bind(&req)
 	if err != nil {
@@ -57,13 +58,13 @@ func (h *PTZHandler) GoToPreset(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
 	}
 
-	slog.Info("PTZHandler | GoToPreset", "req", req)
+	h.logger.Debug("PTZHandler | GoToPreset", "req", req)
 	h.service.GoToPreset(c.Request().Context(), uint(req.CameraID), req.PresetToken)
 	return c.NoContent(http.StatusNoContent)
 }
 
 func (h *PTZHandler) SetPTZPreset(c echo.Context) error {
-	slog.Info("SetPTZPreset")
+	h.logger.Debug("SetPTZPreset")
 	var req models.PTZRequestPreset
 	err := c.Bind(&req)
 	if err != nil {
@@ -71,13 +72,13 @@ func (h *PTZHandler) SetPTZPreset(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
 	}
 
-	slog.Info("PTZHandler | SetPTZPreset", "req", req)
+	h.logger.Debug("PTZHandler | SetPTZPreset", "req", req)
 	h.service.SetPreset(c.Request().Context(), uint(req.CameraID), req.PresetToken)
 	return c.NoContent(http.StatusNoContent)
 }
 
 func (h *PTZHandler) RemovePTZPreset(c echo.Context) error {
-	slog.Info("RemovePTZPreset")
+	h.logger.Debug("RemovePTZPreset")
 	cameraId, err := strconv.Atoi(c.Param("cameraId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid cameraId")
@@ -87,7 +88,7 @@ func (h *PTZHandler) RemovePTZPreset(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "presetToken")
 	}
 
-	slog.Info("RemovePTZPreset data", "cameraId", cameraId, "presetToken", presetToken)
+	h.logger.Debug("RemovePTZPreset data", "cameraId", cameraId, "presetToken", presetToken)
 	h.service.RemovePreset(c.Request().Context(), uint(cameraId), strconv.Itoa(presetToken))
 	return c.NoContent(http.StatusNoContent)
 }
