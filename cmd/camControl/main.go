@@ -2,6 +2,7 @@ package main
 
 import (
 	"camControl/internal/config"
+	camLog "camControl/internal/custom_logger"
 	"camControl/internal/endpoint"
 	"camControl/internal/repository"
 	"camControl/internal/service"
@@ -19,6 +20,8 @@ TODO:
 		- add monitoring in config (prometheus)
 		- if monitoring enabled check available IP camera from monitoring before request,
 	2: add Prometheus metrics per camera all PTZ requests
+	3: add PTZ action zoom
+	4: add PTZ preset tour support
 */
 
 func main() {
@@ -29,9 +32,8 @@ func main() {
 	}
 
 	// config logger
-	// TODO: config logger level from ENV
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	logger.Info("App started")
+	logger := camLog.New(cfg.LogLevel)
+	logger.Info("App started", "logLevel", cfg.LogLevel)
 
 	// init postgres storage
 	camStorage, err := storage.NewPSQLStorage(&cfg.Db, logger)

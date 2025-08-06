@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Db     DbConfig
-	Server ServerConfig
+	Db       DbConfig
+	Server   ServerConfig
+	LogLevel string
 }
 
 type DbConfig struct {
@@ -39,6 +40,7 @@ func Load() (*Config, error) {
 		Server: ServerConfig{
 			Port: getEnv("SERVER_PORT", "8080"),
 		},
+		LogLevel: getEnv("LOG_LEVEL", "info"),
 	}
 
 	return cfg, nil
@@ -49,4 +51,26 @@ func getEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func NewLogger(logLevel string) *slog.Logger {
+	var level slog.Level
+	switch logLevel {
+	case "debug":
+		level = slog.LevelDebug
+	case "info":
+		level = slog.LevelInfo
+	case "warn":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
+
+	handlerOptions := &slog.HandlerOptions{
+		Level:     level,
+		AddSource: logLevel == "debug", // Добавляем исходный код только для debug
+	}
+	return slog.New(slog.NewJSONHandler(os.Stdout, handlerOptions))
 }
