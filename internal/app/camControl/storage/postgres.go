@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"camControl/internal/config"
+	"camControl/internal/app/camControl/config"
 	"context"
 	"fmt"
 	"log/slog"

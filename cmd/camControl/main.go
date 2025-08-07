@@ -1,12 +1,12 @@
 package main
 
 import (
-	"camControl/internal/config"
-	camLog "camControl/internal/custom_logger"
-	"camControl/internal/endpoint"
-	"camControl/internal/repository"
-	"camControl/internal/service"
-	"camControl/internal/storage"
+	"camControl/internal/app/camControl/config"
+	camLog "camControl/internal/app/camControl/custom_logger"
+	"camControl/internal/app/camControl/endpoint"
+	"camControl/internal/app/camControl/repository"
+	"camControl/internal/app/camControl/service"
+	"camControl/internal/app/camControl/storage"
 	"github.com/labstack/echo/v4/middleware"
 	"log/slog"
 	"os"

@@ -1,8 +1,8 @@
 package endpoint
 
 import (
-	"camControl/internal/models"
-	"camControl/internal/service"
+	"camControl/internal/app/camControl/models"
+	"camControl/internal/app/camControl/service"
 	"github.com/labstack/echo/v4"
 	"log/slog"
 	"net/http"

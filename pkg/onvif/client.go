@@ -1,7 +1,7 @@
 package onvif_client
 
 import (
-	"camControl/internal/models"
+	"camControl/internal/app/camControl/models"
 	"context"
 	"encoding/xml"
 	"fmt"

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"camControl/internal/models"
+	"camControl/internal/app/camControl/models"
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"

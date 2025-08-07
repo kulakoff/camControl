@@ -1,8 +1,8 @@
 package service
 
 import (
-	"camControl/internal/models"
-	"camControl/internal/repository"
+	"camControl/internal/app/camControl/models"
+	"camControl/internal/app/camControl/repository"
 	"camControl/pkg/onvif"
 	"context"
 	"log/slog"
