@@ -1,61 +1,17 @@
 package main
 
 import (
-	"camControl/internal/app/camControl/config"
-	camLog "camControl/internal/app/camControl/custom_logger"
-	"camControl/internal/app/camControl/endpoint"
-	"camControl/internal/app/camControl/repository"
-	"camControl/internal/app/camControl/service"
-	"camControl/internal/app/camControl/storage"
-	"github.com/labstack/echo/v4/middleware"
-	"log/slog"
-	"os"
-
-	"github.com/labstack/echo/v4"
+	"camControl/internal/pkg/app"
+	"log"
 )
 
-/**
-TODO:
-	1: monitoring
-		- add monitoring in config (prometheus)
-		- if monitoring enabled check available IP camera from monitoring before request,
-	2: add Prometheus metrics per camera all PTZ requests
-	3: add PTZ action zoom
-	4: add PTZ preset tour support
-*/
-
 func main() {
-	// load config
-	cfg, err := config.Load()
+	a, err := app.New()
 	if err != nil {
-		slog.Error("Error loading config: ", err)
+		log.Fatal(err)
 	}
-
-	// config logger
-	logger := camLog.New(cfg.LogLevel)
-	logger.Info("App started", "logLevel", cfg.LogLevel)
-
-	// init postgres storage
-	camStorage, err := storage.NewPSQLStorage(&cfg.Db, logger)
+	err = a.Start()
 	if err != nil {
-		logger.Error("Error creating storage: ", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
-	defer camStorage.Close()
-
-	// layer 01
-	camRepo := repository.NewCameraRepository(camStorage.DB, logger)
-	// layer 02
-	ptzService := service.NewPTZService(camRepo, logger)
-	// layer 03
-	ptzHandler := endpoint.NewPTZHandler(ptzService, logger)
-
-	e := echo.New()
-	e.HideBanner = false
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-
-	ptzHandler.RegisterRoutes(e)
-
-	go e.Logger.Fatal(e.Start(cfg.Server.Port))
 }
