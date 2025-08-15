@@ -66,10 +66,11 @@ func New() (*App, error) {
 }
 
 func (a *App) Start() error {
+	defer a.storage.Close()
+
 	err := a.echo.Start(a.cfg.Server.Port)
 	if err != nil {
 		return err
 	}
-	defer a.storage.Close()
 	return nil
 }
