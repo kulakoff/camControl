@@ -43,7 +43,7 @@ func New() (*App, error) {
 		a.logger.Error("Error creating storage: ", err)
 		os.Exit(1)
 	}
-	defer a.storage.Close()
+	//defer a.storage.Close()
 
 	// layer 01
 	a.camRepo = repository.NewCameraRepository(a.storage.DB, a.logger)
@@ -70,5 +70,6 @@ func (a *App) Start() error {
 	if err != nil {
 		return err
 	}
+	defer a.storage.Close()
 	return nil
 }
