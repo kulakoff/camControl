@@ -39,7 +39,7 @@ func NewPSQLStorage(conf *config.DbConfig, logger *slog.Logger) (*PSQLStorage, e
 		return nil, fmt.Errorf("unable to ping database: %w", err)
 	}
 
-	slog.Info("storage | Connected to DB", "db", connStr)
+	logger.Info("storage | Connected to DB", "db", connStr)
 
 	return &PSQLStorage{
 		DB:     db,

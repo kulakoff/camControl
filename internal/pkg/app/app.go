@@ -35,7 +35,7 @@ func New() (*App, error) {
 
 	// config logger
 	a.logger = camLog.New(cfg.LogLevel)
-	a.logger.Info("App started", "logLevel", cfg.LogLevel)
+	a.logger.Info("App started")
 
 	// init postgres storage
 	a.storage, err = storage.NewPSQLStorage(&a.cfg.Db, a.logger)

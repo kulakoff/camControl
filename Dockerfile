@@ -2,20 +2,7 @@
 FROM golang:1.23 AS builder
 
 WORKDIR /app
-
-# Copy go.mod и go.sum for load dependency
-COPY go.mod go.sum ./
-RUN go mod download
-
-#  opy project code
 COPY . .
-
-# make app
-RUN CGO_ENABLED=0 GOOS=linux go build -o ptz-camera-service ./cmd
-
-# Final image
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/ptz-camera-service .
-EXPOSE 8080
-CMD ["./ptz-camera-service"]
+RUN go mod tidy
+RUN go build -o /camControl ./cmd/camControl/main.go
+CMD ["/camControl"]
