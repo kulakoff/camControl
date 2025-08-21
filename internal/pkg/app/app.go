@@ -14,13 +14,13 @@ import (
 )
 
 type App struct {
-	echo       *echo.Echo
-	cfg        *config.Config
-	logger     *slog.Logger
-	storage    *storage.PSQLStorage
-	camRepo    repository.CameraRepository
-	ptzService service.PTZService
-	ptzHandler *endpoint.PTZHandler
+	echo     *echo.Echo
+	cfg      *config.Config
+	logger   *slog.Logger
+	storage  *storage.PSQLStorage
+	repo     repository.CameraRepository
+	service  service.PTZService
+	endpoint *endpoint.PTZHandler
 }
 
 func New() (*App, error) {
@@ -43,24 +43,23 @@ func New() (*App, error) {
 		a.logger.Error("Error creating storage: ", err)
 		os.Exit(1)
 	}
-	//defer a.storage.Close()
 
-	// layer 01
-	a.camRepo = repository.NewCameraRepository(a.storage.DB, a.logger)
+	// init layers
+	a.repo = repository.New(a.storage.DB, a.logger)
+	a.service = service.New(a.repo, a.logger)
+	a.endpoint = endpoint.New(a.service, a.logger)
 
-	// layer 02
-	a.ptzService = service.NewPTZService(a.camRepo, a.logger)
-
-	// layer 03
-	a.ptzHandler = endpoint.NewPTZHandler(a.ptzService, a.logger)
-
+	// init echo and middlewares
 	a.echo = echo.New()
 	a.echo.HideBanner = false
 	a.echo.Use(middleware.Logger())
-
 	a.echo.Use(middleware.Recover())
 
-	a.ptzHandler.RegisterRoutes(a.echo)
+	if cfg.LogLevel == "debug" {
+		a.echo.Static("/web", "web")
+	}
+
+	a.endpoint.RegisterRoutes(a.echo)
 
 	return a, nil
 }

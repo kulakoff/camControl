@@ -24,7 +24,7 @@ type ptzService struct {
 	logger      *slog.Logger
 }
 
-func NewPTZService(repo repository.CameraRepository, logger *slog.Logger) PTZService {
+func New(repo repository.CameraRepository, logger *slog.Logger) PTZService {
 	return &ptzService{
 		camRepo: repo,
 		logger:  logger,

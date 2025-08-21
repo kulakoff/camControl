@@ -14,7 +14,7 @@ type PTZHandler struct {
 	logger  slog.Logger
 }
 
-func NewPTZHandler(s service.PTZService, logger *slog.Logger) *PTZHandler {
+func New(s service.PTZService, logger *slog.Logger) *PTZHandler {
 	return &PTZHandler{service: s, logger: *logger}
 }
 
@@ -73,7 +73,10 @@ func (h *PTZHandler) SetPTZPreset(c echo.Context) error {
 	}
 
 	h.logger.Debug("PTZHandler | SetPTZPreset", "req", req)
-	h.service.SetPreset(c.Request().Context(), uint(req.CameraID), req.PresetToken)
+	err = h.service.SetPreset(c.Request().Context(), uint(req.CameraID), req.PresetToken)
+	if err != nil {
+		return err
+	}
 	return c.NoContent(http.StatusNoContent)
 }
 
@@ -97,6 +100,7 @@ func (h *PTZHandler) Ping(c echo.Context) error {
 	return c.JSON(http.StatusOK, "pong")
 }
 
+// RegisterRoutes implement register API routes
 func (h *PTZHandler) RegisterRoutes(e *echo.Echo) {
 	g := e.Group("/ptz")
 	g.GET("/ping", h.Ping)
