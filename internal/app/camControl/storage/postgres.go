@@ -35,7 +35,7 @@ func NewPSQLStorage(conf *config.DbConfig, logger *slog.Logger) (*PSQLStorage, e
 
 	// Check connection
 	if err := db.Ping(context.Background()); err != nil {
-		slog.Error("storage | Unable to ping database", "error", err)
+		logger.Error("storage | Unable to ping database", "error", err)
 		return nil, fmt.Errorf("unable to ping database: %w", err)
 	}
 
@@ -45,17 +45,16 @@ func NewPSQLStorage(conf *config.DbConfig, logger *slog.Logger) (*PSQLStorage, e
 		DB:     db,
 		Logger: logger}, nil
 }
+
 func (s *PSQLStorage) Close() {
 	if s.DB != nil {
 		s.DB.Close()
-		slog.Info("Closed database connection")
+		s.Logger.Info("Closed database connection")
 	}
 }
 
 // formatPostgresURL config to connection URI
 func formatPostgresURL(cfg *config.DbConfig) string {
-	//urlExample := "postgres://username:password@localhost:5432/database_name"
-	//return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		cfg.User,
 		cfg.Password,
@@ -64,21 +63,3 @@ func formatPostgresURL(cfg *config.DbConfig) string {
 		cfg.Database,
 	)
 }
-
-//func (s *PSQLStorage) GetCameraByID(ctx context.Context, cameraId int) (*models.Camera, error) {
-//	camera := &models.Camera{}
-//	query := `SELECT id, ip, login, password FROM cameras WHERE id=$1`
-//
-//	err := s.DB.QueryRow(ctx, query, cameraId).Scan(
-//		&camera.ID,
-//		&camera.IP,
-//		&camera.Login,
-//		&camera.Password,
-//	)
-//	if err != nil {
-//		slog.Error("Error getting camera by id", "id", cameraId)
-//		return nil, err
-//	}
-//
-//	return camera, nil
-//}
